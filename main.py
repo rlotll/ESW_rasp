@@ -117,7 +117,7 @@ class Enemy:
         self.image = Image.open(img_path).resize((40, 40))  # 적 이미지
         self.x = random.randint(30, width - 70)  # 화면 너비 내 랜덤 위치
         self.y = 90  # 에서 시작
-        self.speed = random.randint(3, 5)  # 속도 (3~5)
+        self.speed = random.randint(3, 4)  # 속도 (3~4)
 
     def move(self):
         if self.x < 100:
@@ -228,7 +228,7 @@ while True:
         joystick.disp.image(fail_image)
         break
 
-    if timer > 2000:
+    if timer > 1000:
         joystick.disp.image(success_image)
         break
     
