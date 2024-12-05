@@ -67,6 +67,9 @@ game_draw = ImageDraw.Draw(game_image)
 background = Image.open("track1.png").convert("RGBA")
 joystick.disp.image(background)
 
+backgrounds = [Image.open("track1.png"), Image.open("track2.png")]
+bg_idx = 0
+
 #색 지정 팔레트
 udlr_fill = "#00FF00"
 udlr_outline = "#00FFFF"
@@ -146,8 +149,9 @@ while True:
     
 
     ##배경 그리기##
-    game_image.paste(background, (0, 0), mask=background)
-    # mask= : 투명도가 0인 부분은 제외시키는 역할
+    bg_idx = (bg_idx + 1) % 2
+    current_background = backgrounds[bg_idx]
+    game_image.paste(current_background, (0, 0), mask=current_background) # mask= : 투명도가 0인 부분은 제외시키는 역할
 
     kart.move(command)    
     kart.char_draw(game_image)
