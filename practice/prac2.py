@@ -58,6 +58,14 @@ class Joystick:
         self.width = self.disp.width
         self.height = self.disp.height
 
+
+
+
+
+
+
+
+
 class Character:
     def __init__(self, width, height):
         self.appearance = 'circle'
@@ -95,6 +103,9 @@ class Character:
         #center update
         self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
 
+
+
+
 class Enemy:
     def __init__(self, spawn_position):
         self.appearance = 'circle'
@@ -102,6 +113,9 @@ class Enemy:
         self.position = np.array([spawn_position[0] - 25, spawn_position[1] - 25, spawn_position[0] + 25, spawn_position[1] + 25])
         self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
         self.outline = "#00FF44"
+
+
+
 
 class Bullet:
     def __init__(self, position, command):
@@ -160,6 +174,9 @@ class Bullet:
         return ego_position[0] > other_position[0] and ego_position[1] > other_position[1] \
                  and ego_position[2] < other_position[2] and ego_position[3] < other_position[3]
 
+
+
+
 joystick = Joystick()
 my_image = Image.new("RGB", (joystick.width, joystick.height)) #도화지!
 my_draw = ImageDraw.Draw(my_image) #그리는 도구!
@@ -175,6 +192,7 @@ enemy_3 = Enemy((150, 50))
 enemys_list = [enemy_1, enemy_2, enemy_3]
 
 bullets = []
+
 while True:
     command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
     

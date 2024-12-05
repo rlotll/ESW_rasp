@@ -5,6 +5,7 @@ import board
 from digitalio import DigitalInOut, Direction
 from PIL import Image, ImageDraw, ImageFont
 from adafruit_rgb_display import st7789
+import numpy as np
 
 class Joystick:
     def __init__(self):
@@ -59,18 +60,11 @@ class Joystick:
 
 #시작 세팅
 joystick = Joystick()
-my_image = Image.new("RGB", (joystick.width, joystick.height))
-my_draw = ImageDraw.Draw(my_image)
+game_image = Image.new("RGBA", (joystick.width, joystick.height))
+game_draw = ImageDraw.Draw(game_image)
 
-#검은 직사각형 그리기(화면 초기화)
-my_draw.rectangle((0, 0, joystick.width, joystick.height), fill=(10, 100, 30, 100))
-
-#### 세팅
-
-
-# Draw a black filled box to clear the image.
-my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (255, 255, 255, 100))
-joystick.disp.image(my_image)
+#배경 그리기
+joystick.disp.image(Image.open("background.png"))
 
 #색 지정 팔레트
 udlr_fill = "#00FF00"
@@ -80,8 +74,64 @@ button_outline = "#FFFFFF"
 
 fnt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
 
+#캐릭터 클래스 선언
+class Character:
+    def __init__(self, width, height):
+        self.appearance = 'circle'
+        self.state = None
+        self.position = np.array([width/2 - 20, height/2 - 20, width/2 + 20, height/2 + 20])
+        self.outline = "#FFFFFF"
+        self.image = Image.open("egg.png").resize((40, 40))
+
+        # 총알 발사를 위한 캐릭터 중앙 점 추가
+        self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
+
+    def move(self, command = None):
+        if command['move'] == False:
+            self.state = None
+            self.outline = "#FFFFFF" #검정색
+        
+        else:
+            self.state = 'move'
+            self.outline = "#FF0000" #빨강색
+
+            if command['up_pressed']:
+                self.position[1] -= 5
+                self.position[3] -= 5
+
+            if command['down_pressed']:
+                self.position[1] += 5
+                self.position[3] += 5
+
+            if command['left_pressed']:
+                self.position[0] -= 5
+                self.position[2] -= 5
+                
+            if command['right_pressed']:
+                self.position[0] += 5
+                self.position[2] += 5
+
+        #center update
+        self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
+
+    #캐릭터 그리는 함수
+    def char_draw(self, canvas):
+        canvas.paste(self.image, (int(self.position[0]), int(self.position[1])), mask=self.image)
+
+#객체 선언
+kart = Character(joystick.width, joystick.height)
+#배경 설정
+background = Image.open("background.png").convert("RGBA")
+
+####실행 파트
 while True:
-    command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
+    command = {'move': False,
+               'up_pressed': False ,
+               'down_pressed': False,
+               'left_pressed': False,
+               'right_pressed': False,
+               'A_pressed': False,
+               'B_pressed': False}
     
     if not joystick.button_U.value:  # up pressed
         command['up_pressed'] = True
@@ -99,28 +149,21 @@ while True:
         command['right_pressed'] = True
         command['move'] = True
 
-    #if not joystick.button_A.value: # A pressed
-    '''
-    my_circle.move(command)
-    for bullet in bullets:
-        bullet.collision_check(enemys_list)
-        bullet.move()
-    '''
-    #그리는 순서가 중요합니다. 배경을 먼저 깔고 위에 그림을 그리고 싶었는데 그림을 그려놓고 배경으로 덮는 결과로 될 수 있습니다.
-    my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (255, 255, 255, 100))
-    #my_draw.ellipse(tuple(my_circle.position), outline = my_circle.outline, fill = (0, 0, 0))
+    if not joystick.button_A.value: # A pressed
+        command['A_pressed'] = True
     
-    '''
-    for enemy in enemys_list:
-        if enemy.state != 'die':
-            my_draw.ellipse(tuple(enemy.position), outline = enemy.outline, fill = (255, 0, 0))
+    if not joystick.button_B.value: # B pressed
+        command['B_pressed'] = True
+    
 
-    for bullet in bullets:
-        if bullet.state != 'hit':
-            my_draw.rectangle(tuple(bullet.position), outline = bullet.outline, fill = (0, 0, 255))
-    '''
-    #좌표는 동그라미의 왼쪽 위, 오른쪽 아래 점 (x1, y1, x2, y2)
-    joystick.disp.image(my_image)
+    ##배경 그리기##
+    game_image.paste(background, (0, 0), mask=background) #mask가 투명도, 덮는것과 관련있는듯?
 
-    #화면 갱신 속도
-    time.sleep(0.01)
+    kart.move(command)    
+    kart.char_draw(game_image)
+
+    ##game_image 화면에 송출##
+    joystick.disp.image(game_image)
+
+    ##화면 갱신 속도##
+    time.sleep(0.1)

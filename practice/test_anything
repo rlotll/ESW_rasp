@@ -1,0 +1,6 @@
+disp.image(Image.open("led_pixels_mario.bmp")) # 이미지 띄우기 성공
+
+##이미지 투명하게 띄우기..!
+overlay_image = Image.open("egg.png")
+position = (50, 50)
+game_image.paste(overlay_image, position, mask=overlay_image)
