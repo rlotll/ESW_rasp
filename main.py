@@ -76,24 +76,19 @@ fnt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
 
 #캐릭터 클래스 선언
 class Character:
-    def __init__(self, width, height):
-        self.appearance = 'circle'
+    def __init__(self, width, height, img):
         self.state = None
         self.position = np.array([width/2 - 20, height/2 - 20, width/2 + 20, height/2 + 20])
-        self.outline = "#FFFFFF"
-        self.image = Image.open("egg.png").resize((40, 40))
+        self.image = Image.open(img)
 
-        # 총알 발사를 위한 캐릭터 중앙 점 추가
-        self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
-
+    #움직임 함수
     def move(self, command = None):
         if command['move'] == False:
             self.state = None
-            self.outline = "#FFFFFF" #검정색
+            self.image = Image.open("kart.png")
         
         else:
             self.state = 'move'
-            self.outline = "#FF0000" #빨강색
 
             if command['up_pressed']:
                 self.position[1] -= 5
@@ -104,22 +99,21 @@ class Character:
                 self.position[3] += 5
 
             if command['left_pressed']:
+                self.image = Image.open("kart_l.png")
                 self.position[0] -= 5
                 self.position[2] -= 5
                 
             if command['right_pressed']:
+                self.image = Image.open("kart_r.png")
                 self.position[0] += 5
                 self.position[2] += 5
-
-        #center update
-        self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
 
     #캐릭터 그리는 함수
     def char_draw(self, canvas):
         canvas.paste(self.image, (int(self.position[0]), int(self.position[1])), mask=self.image)
 
 #객체 선언
-kart = Character(joystick.width, joystick.height)
+kart = Character(joystick.width, joystick.height, "kart.png")
 #배경 설정
 background = Image.open("background.png").convert("RGBA")
 
@@ -166,4 +160,4 @@ while True:
     joystick.disp.image(game_image)
 
     ##화면 갱신 속도##
-    time.sleep(0.1)
+    time.sleep(0.01)
