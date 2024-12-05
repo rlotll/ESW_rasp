@@ -99,19 +99,18 @@ while True:
         command['right_pressed'] = True
         command['move'] = True
 
-    if not joystick.button_A.value: # A pressed
-        bullet = Bullet(my_circle.center, command)
-        bullets.append(bullet)
-
+    #if not joystick.button_A.value: # A pressed
+    '''
     my_circle.move(command)
     for bullet in bullets:
         bullet.collision_check(enemys_list)
         bullet.move()
-        
+    '''
     #그리는 순서가 중요합니다. 배경을 먼저 깔고 위에 그림을 그리고 싶었는데 그림을 그려놓고 배경으로 덮는 결과로 될 수 있습니다.
     my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (255, 255, 255, 100))
-    my_draw.ellipse(tuple(my_circle.position), outline = my_circle.outline, fill = (0, 0, 0))
+    #my_draw.ellipse(tuple(my_circle.position), outline = my_circle.outline, fill = (0, 0, 0))
     
+    '''
     for enemy in enemys_list:
         if enemy.state != 'die':
             my_draw.ellipse(tuple(enemy.position), outline = enemy.outline, fill = (255, 0, 0))
@@ -119,7 +118,7 @@ while True:
     for bullet in bullets:
         if bullet.state != 'hit':
             my_draw.rectangle(tuple(bullet.position), outline = bullet.outline, fill = (0, 0, 255))
-
+    '''
     #좌표는 동그라미의 왼쪽 위, 오른쪽 아래 점 (x1, y1, x2, y2)
     joystick.disp.image(my_image)
 
