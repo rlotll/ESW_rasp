@@ -73,11 +73,6 @@ success_image = Image.open("success.png")
 backgrounds = [Image.open("track1.png"), Image.open("track2.png")]
 bg_idx = 0
 
-#색 지정 팔레트
-udlr_fill = "#00FF00"
-udlr_outline = "#00FFFF"
-button_fill = "#FF00FF"
-button_outline = "#FFFFFF"
 
 fnt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
 
