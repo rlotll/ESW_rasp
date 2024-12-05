@@ -63,8 +63,9 @@ joystick = Joystick()
 game_image = Image.new("RGBA", (joystick.width, joystick.height))
 game_draw = ImageDraw.Draw(game_image)
 
-#배경 그리기
-joystick.disp.image(Image.open("background.png"))
+#배경 설정 후 그리기
+background = Image.open("track1.png").convert("RGBA")
+joystick.disp.image(background)
 
 #색 지정 팔레트
 udlr_fill = "#00FF00"
@@ -78,7 +79,7 @@ fnt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
 class Character:
     def __init__(self, width, height, img):
         self.state = None
-        self.position = np.array([width/2 - 20, height/2 - 20, width/2 + 20, height/2 + 20])
+        self.position = np.array([width/2 - 60, height/2 - 30])
         self.image = Image.open(img)
 
     #움직임 함수
@@ -92,30 +93,24 @@ class Character:
 
             if command['up_pressed']:
                 self.position[1] -= 5
-                self.position[3] -= 5
 
             if command['down_pressed']:
                 self.position[1] += 5
-                self.position[3] += 5
 
             if command['left_pressed']:
                 self.image = Image.open("kart_l.png")
                 self.position[0] -= 5
-                self.position[2] -= 5
                 
             if command['right_pressed']:
                 self.image = Image.open("kart_r.png")
                 self.position[0] += 5
-                self.position[2] += 5
 
     #캐릭터 그리는 함수
     def char_draw(self, canvas):
         canvas.paste(self.image, (int(self.position[0]), int(self.position[1])), mask=self.image)
 
-#객체 선언
+#카트 객체 선언
 kart = Character(joystick.width, joystick.height, "kart.png")
-#배경 설정
-background = Image.open("background.png").convert("RGBA")
 
 ####실행 파트
 while True:
@@ -151,7 +146,8 @@ while True:
     
 
     ##배경 그리기##
-    game_image.paste(background, (0, 0), mask=background) #mask가 투명도, 덮는것과 관련있는듯?
+    game_image.paste(background, (0, 0), mask=background)
+    # mask= : 투명도가 0인 부분은 제외시키는 역할
 
     kart.move(command)    
     kart.char_draw(game_image)
