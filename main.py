@@ -114,10 +114,10 @@ class Character:
 class Enemy:
     def __init__(self, width, height, img_path):
         self.touched = 'no'
-        self.image = Image.open(img_path).resize((40, 40))  # 적 이미지
-        self.x = random.randint(30, width - 70)  # 화면 너비 내 랜덤 위치
-        self.y = 90  # 에서 시작
-        self.speed = random.randint(3, 4)  # 속도 (3~4)
+        self.image = Image.open(img_path).resize((40, 40))
+        self.x = random.randint(30, width - 70)  #화면 너비 내 랜덤 위치
+        self.y = 90  #에서 시작
+        self.speed = random.randint(3, 4)  #속도 : 3~4
 
     def move(self):
         if self.x < 100:
@@ -133,33 +133,32 @@ class Enemy:
 
 #충돌 검사
 def check_collision(char, enemy):
-    # 두 이미지를 겹치는 영역 계산
+    #두 이미지를 겹치는 영역 계산
     overlap_left = max(char.position[0], enemy.x)
     overlap_top = max(char.position[1], enemy.y)
-    overlap_right = min(char.position[0] + 120, enemy.x + 40)  # 캐릭터와 적 크기
+    overlap_right = min(char.position[0] + 120, enemy.x + 40)  #캐릭터와 적 크기
     overlap_bottom = min(char.position[1] + 120, enemy.y + 40)
 
-    # 겹치는 영역이 없다면 충돌 없음
+    #겹치는 영역이 없다면 충돌 없음
     if overlap_left >= overlap_right or overlap_top >= overlap_bottom:
         return False
 
-    # 겹치는 영역에서 픽셀 충돌 확인
+    #겹치는 영역에서 픽셀 충돌 확인
     for x in range(int(overlap_left), int(overlap_right)):
         for y in range(int(overlap_top), int(overlap_bottom)):
             char_pixel = char.image.getpixel((x - char.position[0], y - char.position[1]))
             enemy_pixel = enemy.image.getpixel((x - enemy.x, y - enemy.y))
-            if char_pixel[3] > 0 and enemy_pixel[3] > 0:  # 알파 값이 0보다 크면 픽셀이 존재
+            if char_pixel[3] > 0 and enemy_pixel[3] > 0:  #알파 값이 0보다 크면 픽셀이 존재
                 return True
     return False
 
+#바나나, 실패 플래그, 시간 계산 변수 선언
 enemies = []
 fail_flag = 0
 timer = 0
 
 #카트 객체 선언
 kart = Character(joystick.width, joystick.height, "kart.png")
-#바나나 객체 선언
-#banana = Enemy(joystick.width, joystick.height, "banana.png")
 
 ####실행 파트
 while True:
@@ -199,35 +198,37 @@ while True:
     current_background = backgrounds[bg_idx]
     game_image.paste(current_background, (0, 0), mask=current_background) # mask= : 투명도가 0인 부분은 제외시키는 역할
 
-    # 적 생성 (8% 확률로 생성)
+    #적 생성 (해보니 8%가 적당)
     if random.random() < 0.08:
         enemies.append(Enemy(joystick.width, joystick.height, "banana.png"))
 
-    # 적 이동 및 그리기
+    #적 움직임, 그리기
     for enemy in enemies:
         enemy.move()
         enemy.draw(game_image)
 
-    # 적 제거 (화면 아래로 나간 적)
+    #화면 아래로 나간 적 제거
     enemies = [enemy for enemy in enemies if enemy.y < joystick.height]
 
+    #카트 움직임, 그리기
     kart.move(command)    
     kart.char_draw(game_image)
 
-    # 충돌 처리
+    #충돌 처리
     for enemy in enemies:
         if check_collision(kart, enemy):
-            # 게임 종료 처리 또는 캐릭터 체력 감소 등 추가
             fail_flag = 1
             break
 
     ##game_image 화면에 송출##
     joystick.disp.image(game_image)
 
+    #바나나에 닿았을 시 실패 이미지 띄우고 종료
     if fail_flag:
         joystick.disp.image(fail_image)
         break
 
+    #일정 시간 바나나에 닿지 않고 훈련을 마치면 성공 이미지 띄우고 종료
     if timer > 1000:
         joystick.disp.image(success_image)
         break
