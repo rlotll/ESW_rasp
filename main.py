@@ -67,12 +67,13 @@ game_draw = ImageDraw.Draw(game_image)
 background = Image.open("track1.png").convert("RGBA")
 joystick.disp.image(background)
 
+#실패, 성공 시 이미지 저장
 fail_image = Image.open("fail.png")
 success_image = Image.open("success.png")
 
+#배경 애니메이션 효과 적용
 backgrounds = [Image.open("track1.png"), Image.open("track2.png")]
 bg_idx = 0
-
 
 fnt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
 
@@ -83,7 +84,7 @@ class Character:
         self.position = np.array([width/2 - 60, height/2 - 10])
         self.image = Image.open(img)
 
-    #움직임 함수
+    #움직임 구현
     def move(self, command = None):
         if command['move'] == False:
             self.state = None
@@ -113,33 +114,31 @@ class Character:
 #피할 대상 클래스 선언
 class Enemy:
     def __init__(self, width, height, img_path):
-        self.touched = 'no'
         self.image = Image.open(img_path).resize((40, 40))
-        self.x = random.randint(30, width - 70)  #화면 너비 내 랜덤 위치
-        self.y = 90  #에서 시작
-        self.speed = random.randint(3, 4)  #속도 : 3~4
+        self.x = random.randint(30, width - 70) #트랙 배경 내 랜덤 위치
+        self.y = 90 #지평선에서 등장
+        self.speed = random.randint(3, 4) #속도 - 두가지로 랜덤하게
 
     def move(self):
         if self.x < 100:
             self.y += self.speed
-            self.x -= 2 #대각선 이동
+            self.x -= 2 #대각선 이동하여 입체감 유지
         else:
             self.y += self.speed
             self.x += 2
 
     def draw(self, canvas):
-        if self.touched == 'no':
-            canvas.paste(self.image, (self.x, self.y), mask=self.image)
+        canvas.paste(self.image, (self.x, self.y), mask=self.image)
 
 #충돌 검사
 def check_collision(char, enemy):
-    #두 이미지를 겹치는 영역 계산
-    overlap_left = max(char.position[0], enemy.x)
+    #두 이미지가 겹치는 영역 계산
+    overlap_left = max(char.position[0], enemy.x) #카트, 바나나
     overlap_top = max(char.position[1], enemy.y)
-    overlap_right = min(char.position[0] + 120, enemy.x + 40)  #캐릭터와 적 크기
+    overlap_right = min(char.position[0] + 120, enemy.x + 40)
     overlap_bottom = min(char.position[1] + 120, enemy.y + 40)
 
-    #겹치는 영역이 없다면 충돌 없음
+    #겹치는 영역이 없을 때
     if overlap_left >= overlap_right or overlap_top >= overlap_bottom:
         return False
 
@@ -148,7 +147,9 @@ def check_collision(char, enemy):
         for y in range(int(overlap_top), int(overlap_bottom)):
             char_pixel = char.image.getpixel((x - char.position[0], y - char.position[1]))
             enemy_pixel = enemy.image.getpixel((x - enemy.x, y - enemy.y))
-            if char_pixel[3] > 0 and enemy_pixel[3] > 0:  #알파 값이 0보다 크면 픽셀이 존재
+
+            #알파 값이 0보다 크면 픽셀이 존재 -> 겹치는 영역에 둘 다 픽셀이 존재하면 충돌!
+            if char_pixel[3] > 0 and enemy_pixel[3] > 0:
                 return True
     return False
 
@@ -160,7 +161,7 @@ timer = 0
 #카트 객체 선언
 kart = Character(joystick.width, joystick.height, "kart.png")
 
-####실행 파트
+####실행 파트####
 while True:
     command = {'move': False,
                'up_pressed': False ,
@@ -194,11 +195,11 @@ while True:
     
 
     ##배경 그리기##
-    bg_idx = (bg_idx + 1) % 2
+    bg_idx = (bg_idx + 1) % 2 #인덱스값이 0과 1로만 반복되도록 모듈러 연산
     current_background = backgrounds[bg_idx]
     game_image.paste(current_background, (0, 0), mask=current_background) # mask= : 투명도가 0인 부분은 제외시키는 역할
 
-    #적 생성 (해보니 8%가 적당)
+    #적 생성 (해보니 생성 확률은 8%가 적당)
     if random.random() < 0.08:
         enemies.append(Enemy(joystick.width, joystick.height, "banana.png"))
 
@@ -207,7 +208,7 @@ while True:
         enemy.move()
         enemy.draw(game_image)
 
-    #화면 아래로 나간 적 제거
+    #화면 아래로 이탈한 적 제거
     enemies = [enemy for enemy in enemies if enemy.y < joystick.height]
 
     #카트 움직임, 그리기
@@ -229,11 +230,12 @@ while True:
         break
 
     #일정 시간 바나나에 닿지 않고 훈련을 마치면 성공 이미지 띄우고 종료
-    if timer > 1000:
+    if timer > 1000: #100초(1분 40초)
         joystick.disp.image(success_image)
         break
     
     #시간 측정
     timer += 1
+    
     ##화면 갱신 속도##
     time.sleep(0.01)
