@@ -142,8 +142,8 @@ def check_collision(char, enemy):
     if overlap_left >= overlap_right or overlap_top >= overlap_bottom:
         return False
 
-    #겹치는 영역에서 픽셀 충돌 확인
-    for x in range(int(overlap_left), int(overlap_right)):
+    #픽셀 단위로 충돌 확인
+    for x in range(int(overlap_left), int(overlap_right)): #겹치는 영역 계산
         for y in range(int(overlap_top), int(overlap_bottom)):
             char_pixel = char.image.getpixel((x - char.position[0], y - char.position[1]))
             enemy_pixel = enemy.image.getpixel((x - enemy.x, y - enemy.y))
@@ -230,12 +230,12 @@ while True:
         break
 
     #일정 시간 바나나에 닿지 않고 훈련을 마치면 성공 이미지 띄우고 종료
-    if timer > 1000: #100초(1분 40초)
+    if timer > 600: #약 60초
         joystick.disp.image(success_image)
         break
     
     #시간 측정
     timer += 1
-    
+
     ##화면 갱신 속도##
     time.sleep(0.01)
